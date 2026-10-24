@@ -1,0 +1,30 @@
+BMH INVENTARIO — ACTUALIZACIÓN 3
+
+Incluye:
+- SKU automático BMH-00001, BMH-00002... asignado desde PostgreSQL.
+- Código de barras interno automático con dígito de control cuando se deja vacío.
+- Categorías guardadas por almacén en Supabase.
+- Preferencia de modo oscuro.
+- Campos de permisos granulares y RPC protegida para que solo el creador pueda modificarlos.
+
+IMPORTANTE: antes de aplicar, conserva una copia del proyecto y de los datos. No borres tablas.
+
+PASOS
+1. En Supabase > SQL Editor ejecuta TODO el archivo:
+   supabase/migrations/003_sku_barcode_categories_permissions.sql
+   Solo después de haber aplicado las migraciones 001 y 002.
+2. En la carpeta del proyecto ejecuta:
+   npm install
+   npm run build
+   npm run dev
+3. Prueba creando un producto sin SKU ni código de barras; deben asignarse automáticamente al insertar en Supabase.
+4. En la sección Opciones, agrega una categoría y comprueba que sigue disponible tras recargar.
+5. Activa modo oscuro y recarga para comprobar que la preferencia persiste.
+
+ADVERTENCIA HONESTA
+La interfaz de Opciones ya incluye preferencias y categorías. La administración visual de permisos por integrante todavía debe completarse y probarse; la migración agrega el esquema/RPC seguro para ello. Antes de producción, revisar cuidadosamente la exposición de costo/precio mediante RLS y las políticas de lectura de productos. No uses el sistema con información financiera sensible hasta validar permisos completos.
+
+PUBLICACIÓN
+- Configura VITE_SUPABASE_URL y VITE_SUPABASE_PUBLISHABLE_KEY en Vercel.
+- Nunca publiques service_role ni sb_secret.
+- No subas .env.local a GitHub.

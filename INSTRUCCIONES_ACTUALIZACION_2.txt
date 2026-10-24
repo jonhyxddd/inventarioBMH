@@ -1,0 +1,16 @@
+BMH INVENTARIO — ACTUALIZACIÓN 2
+
+1) Supabase: abre SQL Editor y ejecuta TODO el archivo supabase/migrations/002_warehouse_join_usernames.sql. No vuelvas a ejecutar 001.
+2) En la carpeta del proyecto ejecuta: npm install
+3) Después ejecuta: npm run build
+4) Para probar localmente: npm run dev y abre http://localhost:5173
+5) Crea un almacén con la primera cuenta y copia el código. Con otra cuenta elige “Unirme con código” e introduce ese código.
+6) Registra una salida y verifica el usuario en historial; abre Reportes PDF y genera un reporte diario/semanal/mensual/personalizado.
+
+PUBLICAR EN VERCEL
+- Sube los archivos a GitHub, sin subir .env.local ni claves.
+- Importa el repositorio en Vercel. Build: npm run build; Output: dist.
+- Configura variables VITE_SUPABASE_URL y VITE_SUPABASE_PUBLISHABLE_KEY en Vercel. Solo la clave publishable/anon pública; nunca service_role o sb_secret.
+- En Supabase Auth > URL Configuration configura el dominio Vercel como Site URL y Redirect URL.
+
+NOTA: El código y la migración se han preparado, pero la compilación debe confirmarse en un equipo con acceso a npm. Antes de producción, revisar RLS y limitar la vista de precios/costos/finanzas por rol.

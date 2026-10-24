@@ -1,0 +1,35 @@
+PROMPT PARA CLAUDE — CONTINUAR BMH INVENTARIO SIN REHACERLO
+
+Actúa como desarrollador senior full-stack especializado en React + TypeScript + Supabase/PostgreSQL y seguridad RLS. Estoy trabajando sobre un proyecto existente llamado BMH Inventario. NO lo rehagas desde cero ni borres funciones existentes. Primero inspecciona todos los archivos, entiende las tablas y funciones existentes y luego implementa cambios compatibles.
+
+OBJETIVO
+Entregar una aplicación de inventario usable y lista para desplegar, manteniendo React/Vite/TypeScript y Supabase. Debe funcionar con las migraciones 001_initial_schema.sql, 002_warehouse_join_usernames.sql y 003_sku_barcode_categories_permissions.sql, en ese orden. No pidas ni uses service_role/secret keys en frontend; únicamente VITE_SUPABASE_URL y VITE_SUPABASE_PUBLISHABLE_KEY.
+
+CAMBIOS YA PREPARADOS EN EL PROYECTO
+- Migración 003 agrega secuencias para SKU y código de barras, tabla de categorías por almacén, columnas de permisos granulares, función set_member_permissions, trigger de SKU/código de barras, y refuerza que solo businesses.created_by administre permisos.
+- La interfaz tiene selector de modo oscuro y una sección Opciones con alta de categorías persistidas.
+- En alta de producto, SKU y código de barras se generan desde PostgreSQL si se dejan vacíos.
+
+TAREA: REVISA Y TERMINA LO SIGUIENTE
+1. Completa la sección Opciones con gestión real de integrantes del almacén. Debe listar integrantes del business_members actual, mostrar nombre/correo y sus permisos, y permitir que SOLO el creador (businesses.created_by) active/desactive: gestionar productos, registrar entradas/salidas y consultar finanzas. Llama a la RPC set_member_permissions. Oculta o deshabilita controles para no-creadores y muestra claramente “Solo el creador puede administrar permisos”. Nunca confíes solo en ocultar botones: RLS/RPC debe protegerlo.
+2. En la pantalla financiera, oculta datos financieros a usuarios sin can_view_finance, y también protege las consultas mediante SQL/RLS o una RPC segura. No basta con ocultar componentes en React. No expongas costo de compra a operadores sin permiso. Revisa que las políticas actuales no permitan leer cost_price a cualquier miembro; si hace falta, mueve datos financieros a una tabla protegida o usa vistas/RPC seguras.
+3. Asegura que los permisos se apliquen a cada acción: gestionar productos, registrar movimientos, ver finanzas, ajustar existencias, gestionar miembros y categorías. El creador siempre mantiene permisos completos. Los admins no pueden cambiar permisos si no son el creador.
+4. SKU: al insertar un producto sin SKU, generar BMH-00001, BMH-00002, etc. desde base de datos con secuencia/trigger para evitar duplicados concurrentes. Si un SKU ya existe en importaciones, no sobrescribirlo. Mostrar SKU al guardar y en tabla de catálogo.
+5. Código de barras: generar automáticamente si no se proporciona; garantizar unicidad; mostrarlo en producto y crear acción “Imprimir etiqueta” con barras legibles y texto de código. Añadir una biblioteca adecuada (por ejemplo JsBarcode) si conviene, respetando el formato numérico/estándar. No afirmar que es un UPC/EAN comercial asignado por GS1: es un identificador interno BMH, aunque se use checksum EAN-13 para lectura de escáneres.
+6. Categorías: CRUD para creador (agregar, renombrar, eliminar solo si no está en uso o pedir reasignación), por almacén, persistidas en Supabase. Al crear un producto, selector alimentado desde la base de datos; evitar duplicados ignorando mayúsculas/minúsculas y espacios. Mantener compatibles productos viejos con categoría de texto.
+7. Tema oscuro: persistir preferencia localmente, cambiar todas las pantallas, tablas, formularios, modal, alertas, estados hover y responsive; no depender solo de la preferencia del navegador.
+8. Opciones adicionales útiles: perfil editable, copiar código de almacén, filtros por categoría/stock bajo, exportación CSV, confirmación antes de acciones destructivas, estados de carga/error, accesibilidad y diseño móvil. No agregar funciones vacías ni botones decorativos.
+9. Almacenes: al crear perfil, permitir crear almacén o unirse con código. El código por sí solo no debe otorgar acceso; validar membresía en una RPC segura. Evitar que el usuario termine con varios almacenes y la interfaz seleccione uno al azar; implementar selector de almacén si pertenece a más de uno.
+10. Movimientos: registrar usuario real con nombre de perfil o correo de fallback, fecha, producto, cantidad, unidad, motivo, existencia anterior/posterior. No permitir stock negativo y registrar en transacción atómica de PostgreSQL.
+11. PDF de salidas: reporte del día/semana/mes/rango personalizado, zona horaria America/Mexico_City, diseño profesional A4 horizontal, encabezado BMH Inventario, nombre de negocio y almacén, periodo, fecha de generación, totales, filas con usuario y paginación. Verifica que PDF no mezcle movimientos de otros almacenes.
+12. Hosting: prepara para Vercel (vite build, fallback SPA si necesario), actualiza README con configuración de variables de entorno, migraciones y despliegue. Nunca incluir .env.local en Git ni en ZIP público.
+
+REGLAS DE TRABAJO
+- Antes de modificar, revisa App.tsx, style.css, supabase/migrations y package.json.
+- Mantén el diseño actual y el idioma español mexicano.
+- No elimines ni resetees datos existentes.
+- Escribe migraciones nuevas idempotentes; no edites migraciones ya aplicadas si eso puede romper instalaciones existentes.
+- Comprueba TypeScript y ejecuta npm run build. Si no puedes ejecutar comandos, dilo claramente y no afirmes que compiló.
+- Prueba SQL para usuario anónimo, integrante sin permiso, integrante con permiso y creador.
+- Entrega todos los archivos completos modificados, no solo fragmentos. Resume qué migración ejecutar y en qué orden, qué variables usar y cómo probarlo.
+- No inventes datos ni credenciales. Usa solo URL y clave publicable ya configuradas en .env.local del usuario; nunca escribas claves en el código o en el prompt.

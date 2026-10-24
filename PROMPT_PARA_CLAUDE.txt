@@ -1,0 +1,77 @@
+PROMPT MAESTRO PARA CLAUDE — BMH INVENTARIO (CONTINUAR PROYECTO EXISTENTE)
+
+Actúa como ingeniero senior full-stack especializado en React, TypeScript, Supabase/PostgreSQL, seguridad RLS y despliegues web. Debes continuar el proyecto BMH Inventario existente, no empezar una aplicación distinta ni reemplazar su diseño sin necesidad.
+
+CONTEXTO ACTUAL
+- Nombre: BMH Inventario, para BMH Suministros.
+- Frontend: React 18 + TypeScript + Vite.
+- Base de datos/autenticación: Supabase.
+- Tablas existentes: profiles, businesses, business_members, warehouses, products, inventory_movements.
+- Ya funciona el inicio/registro de sesión, creación inicial de negocio y almacén, catálogo de productos, entradas/salidas, historial, resumen financiero y exportación CSV.
+- Supabase URL configurada en el entorno del propietario. No pidas ni escribas claves secretas. El frontend solo debe usar VITE_SUPABASE_URL y VITE_SUPABASE_PUBLISHABLE_KEY (o anon key pública heredada). Nunca usar sb_secret ni service_role en navegador, repositorio ni variables VITE_.
+- Mantén el diseño profesional existente, responsivo para móvil y PC, con estilo azul marino/azul, panel lateral y tarjetas.
+
+OBJETIVOS OBLIGATORIOS
+1) PUBLICACIÓN EN HOSTING
+- Dejar el proyecto listo para producción en Vercel (o Netlify si justificas la opción).
+- Confirmar scripts: npm install, npm run build, npm run dev.
+- Incluir instrucciones exactas para subir a GitHub sin .env.local y conectar el repositorio al host.
+- Build command: npm run build; output directory: dist.
+- Documentar las variables de entorno de producción: VITE_SUPABASE_URL y VITE_SUPABASE_PUBLISHABLE_KEY.
+- Configurar las URLs de autenticación correctas en Supabase Auth > URL Configuration (dominio de producción y localhost para desarrollo).
+- Incluir fallback SPA/rewrite si el hosting lo necesita.
+- No afirmar que el build pasó si no se ejecutó realmente. Ejecutar build y pruebas y reportar errores reales.
+
+2) FLUJO POST-REGISTRO: CREAR ALMACÉN O UNIRSE
+- Al terminar de crear cuenta e iniciar sesión, si el usuario no pertenece a ningún almacén mostrar dos opciones claras:
+  A. “Crear un almacén”: nombre del negocio y nombre del almacén. Crear todo en Supabase y mostrar el código único del almacén al propietario, con opción para copiarlo.
+  B. “Unirme a un almacén”: campo para introducir código de almacén, normalizar espacios/mayúsculas, validarlo de forma segura en PostgreSQL y registrar al usuario como integrante del almacén.
+- Código incorrecto: mensaje amigable, sin revelar datos de otros negocios.
+- Código correcto: asociar el usuario al negocio y al almacén concretos, asignar rol operator por defecto, sin permisos financieros ni administrativos.
+- El código no debe ser una contraseña ni conceder permisos adicionales. Solo permite solicitar incorporación. Validar autenticación y realizar la operación en función RPC SECURITY DEFINER con search_path fijado y nombres de tablas totalmente calificados.
+- Si el modelo permite varios almacenes por negocio, el usuario solo debe ver los almacenes a los que tiene acceso. Guardar warehouse_id en la relación de membresía y aplicar RLS por almacén. No dejar que un usuario de un almacén pueda leer inventario de otro por compartir business_id.
+- No crear membresías desde el navegador mediante insert directo si una RPC segura puede hacerlo.
+- Si se cambia el esquema, crear una migración nueva, idempotente cuando sea posible, compatible con usuarios/datos existentes. No pedir que borre la base ni que repita la migración inicial.
+
+3) AUDITORÍA DE MOVIMIENTOS CON EL NOMBRE DE QUIEN ACTÚA
+- Cada movimiento de inventario debe guardar user_id autenticado y un snapshot del nombre visible del usuario al momento de registrar el movimiento (profiles.full_name o el nombre que la persona capturó durante registro). Si falta nombre, usar una alternativa no vacía, por ejemplo la parte anterior a @ del correo.
+- Guardar también snapshot de producto y unidad para que el historial/reporte siga siendo correcto aunque se renombre el producto después.
+- La función RPC record_inventory_movement debe obtener auth.uid() en servidor; nunca confiar en un user_id enviado desde el frontend.
+- El registro debe ser transaccional: validar cantidad positiva, existencia suficiente para salidas, permiso de acceso al almacén y actualización de stock y registro de movimiento en la misma transacción.
+- Mostrar columna “Registró” en historial, y nombre de usuario en PDF. No permitir que el usuario edite o suplante quién hizo un movimiento.
+- La información histórica previa a la migración debe rellenarse cuando sea posible con profiles y productos existentes; si no, mostrar “Usuario sin nombre”/“Dato histórico no disponible”, sin inventar identidades.
+
+4) REPORTES PDF DE SALIDAS
+- Agregar una sección “Reportes PDF”.
+- Periodos rápidos: Hoy, Esta semana (lunes a domingo), Este mes (primer al último día del mes) y Personalizado (fecha inicial/final).
+- Seleccionar únicamente salidas (movement_type='exit') del almacén activo, con límites de fecha correctos y evitando desfases UTC/locales.
+- El PDF debe generarse desde datos consultados a Supabase, no solo desde los 100 movimientos recientes en memoria.
+- Formato profesional, preferiblemente A4 horizontal si la tabla lo requiere. Encabezado BMH Inventario / BMH Suministros, nombre del negocio y almacén, periodo, fecha de generación, cantidad de registros, suma de cantidades y tabla con fecha/hora, producto, cantidad, unidad, motivo, notas, nombre del usuario, existencia anterior y posterior.
+- Formato consistente de fechas en español de México; encabezados con fondo azul marino, filas alternas, márgenes, texto legible, encabezado/pie y numeración de páginas. El PDF debe manejar muchas filas y saltos de página. Nombre de archivo tipo BMH_Salidas_YYYY-MM-DD_YYYY-MM-DD.pdf.
+- Si no existen salidas en el periodo, generar un PDF válido con “Sin salidas en el periodo” y cero registros o mostrar una opción clara al usuario.
+- Añadir e instalar una librería mantenida compatible con Vite (por ejemplo jspdf + jspdf-autotable), declarar dependencias y actualizar package-lock si se puede instalar.
+
+5) SEGURIDAD Y CALIDAD
+- Revisar RLS de todas las tablas afectadas, en particular products, warehouses, inventory_movements, business_members y profiles.
+- Operadores no deben poder ver costos, precios privados ni resumen financiero salvo permiso explícito. Ocultar también en UI y no confiar solo en ocultar pestañas. Crear políticas/vistas seguras o RPCs según corresponda.
+- El propietario/jefe conserva acceso a la información financiera de sus almacenes autorizados.
+- No desactivar RLS ni dar permisos anon amplios para “hacer que funcione”.
+- No usar datos falsos ni localStorage como sustituto de Supabase.
+- Mantener las funcionalidades actuales: catálogo con nombre, código, categoría, ubicación, código de barras, proveedor, precio de venta/costo, unidad, stock mínimo, existencia, notas; entradas, salidas, historial, alertas y panel de jefe.
+- Evitar pérdida de datos, movimientos negativos, doble registro o doble clic. Mostrar errores en español y estados de carga.
+- Usar nombres de funciones y columnas consistentes. No duplicar migraciones ni eliminar datos existentes.
+
+ENTREGABLES QUE DEBES PRODUCIR
+A. Modificaciones reales al proyecto, no solo consejos ni fragmentos incompletos.
+B. Migración SQL nueva con todo lo necesario y comentarios para ejecutarla en Supabase SQL Editor.
+C. Código completo actualizado de los archivos afectados y dependencias correctas.
+D. README con pasos de instalación, migración, pruebas, variables de entorno y publicación.
+E. Lista de pruebas manuales que incluya: crear propietario/almacén, copiar código, registrar segunda cuenta, unirse por código válido, probar código inválido, comprobar aislamiento entre almacenes, registrar salida y verificar el nombre del actor, generar PDF diario/semanal/mensual/personalizado, validar rango sin movimientos y probar build.
+F. Si puedes editar archivos, entregar ZIP actualizado del proyecto y prompt/instrucciones. Si no puedes ejecutar npm install/build por limitación de red, dilo explícitamente; no inventes que pasó.
+
+MODO DE TRABAJO
+- Primero inspecciona el código y la migración que ya existen. No asumas que la estructura es diferente.
+- Trabaja directamente sobre el proyecto existente y conserva lo que ya funciona.
+- Haz cambios completos y coherentes en frontend, SQL, tipos y documentación.
+- Ejecuta npm install y npm run build cuando sea posible. Corrige errores reales de TypeScript/build antes de declarar listo.
+- Al final explica exactamente qué archivos cambiaste, qué SQL debo ejecutar, cómo probarlo localmente y cómo publicarlo. No solicites claves secretas.

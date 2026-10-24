@@ -1,0 +1,18 @@
+BMH INVENTARIO — NUEVA SECCIÓN USUARIOS Y PERMISOS
+
+1. Haz una copia de seguridad de los archivos actuales del proyecto.
+2. En Supabase abre SQL Editor del mismo proyecto conectado por VITE_SUPABASE_URL.
+3. Ejecuta el contenido de supabase/migrations/004_users_permissions_ui.sql después de las migraciones anteriores.
+4. Reemplaza los archivos del proyecto por los incluidos en este paquete, sin borrar tu archivo .env.local.
+5. Instala dependencias si hace falta: npm install
+6. Prueba compilación: npm run build
+7. Inicia localmente: npm run dev
+8. Inicia sesión con la cuenta creadora del negocio y entra a “Usuarios y permisos”. Cambia un permiso de un usuario de prueba y pulsa Guardar.
+9. Entra con la cuenta del usuario de prueba para comprobar los permisos efectivos.
+
+IMPORTANTE:
+- No vuelvas a ejecutar la migración 001 ni elimines tablas.
+- Conserva el archivo .env.local actual. No incluyas claves secretas ni service_role en el frontend.
+- Esta pantalla permite al propietario cambiar tres permisos: administrar productos, registrar movimientos y ver finanzas.
+- La protección de datos financieros también debe estar aplicada en políticas RLS/consultas de Supabase; ocultar una sección en pantalla no sustituye la seguridad de base de datos.
+- Si la migración 003 no se aplicó completamente, revisa primero su estado y el esquema actual antes de ejecutar la 004.
