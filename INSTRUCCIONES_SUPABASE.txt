@@ -1,7 +1,7 @@
 BMH INVENTARIO — CONFIGURACIÓN DE SUPABASE
 
 PROYECTO
-URL: https://yuvjcmksynyukkrnheyn.supabase.co
+URL: https://TU-PROYECTO.supabase.co
 Clave publicable: usa la clave sb_publishable que tienes. Esta clave está diseñada para el cliente, pero solo es segura junto con las políticas RLS. No compartas claves sb_secret, service_role ni contraseña de PostgreSQL.
 
 PASO A: CREAR TABLAS Y POLÍTICAS
