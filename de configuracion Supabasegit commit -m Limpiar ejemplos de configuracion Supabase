@@ -1,0 +1,21 @@
+[1mdiff --git a/.env.local.example b/.env.local.example[m
+[1mindex 8e4dcfe..980985f 100644[m
+[1m--- a/.env.local.example[m
+[1m+++ b/.env.local.example[m
+[36m@@ -1,2 +1,2 @@[m
+[31m-VITE_SUPABASE_URL=https://yuvjcmksynyukkrnheyn.supabase.co[m
+[32m+[m[32mVITE_SUPABASE_URL=https://TU-PROYECTO.supabase.co[m
+ VITE_SUPABASE_PUBLISHABLE_KEY=PEGA_AQUI_LA_CLAVE_sb_publishable_QUE_COMPARTISTE[m
+[1mdiff --git a/INSTRUCCIONES_SUPABASE.txt b/INSTRUCCIONES_SUPABASE.txt[m
+[1mindex 1403058..00df748 100644[m
+[1m--- a/INSTRUCCIONES_SUPABASE.txt[m
+[1m+++ b/INSTRUCCIONES_SUPABASE.txt[m
+[36m@@ -1,7 +1,7 @@[m
+ BMH INVENTARIO — CONFIGURACIÓN DE SUPABASE[m
+ [m
+ PROYECTO[m
+[31m-URL: https://yuvjcmksynyukkrnheyn.supabase.co[m
+[32m+[m[32mURL: https://TU-PROYECTO.supabase.co[m
+ Clave publicable: usa la clave sb_publishable que tienes. Esta clave está diseñada para el cliente, pero solo es segura junto con las políticas RLS. No compartas claves sb_secret, service_role ni contraseña de PostgreSQL.[m
+ [m
+ PASO A: CREAR TABLAS Y POLÍTICAS[m
